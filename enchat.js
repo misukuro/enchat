@@ -2,15 +2,16 @@ var port = 20105;
 
 // websocketとexpressの読み込み
 var express = require("express");
-var app = express.createServer();
-var io = require("socket.io").listen(app);
+var app = express();
+var server = require("http").createServer(app);
+var io = require("socket.io").listen(server);
+server.listen(port);
 io.set("log level", 1);
 
 // expressの設定と起動
 app.configure(function() {
   app.use(express.static(__dirname + "/public"));
 });
-app.listen(port);
 console.log("Server started.");
 
 var player_list = new Array(); // ログイン中プレイヤー情報を名前から得る関数へのハッシュ
@@ -67,3 +68,4 @@ io.sockets.on("connection", function(socket) {
     delete player_list[ player.login_name ];
   });
 });
+
