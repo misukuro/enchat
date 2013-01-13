@@ -30,6 +30,18 @@ io.sockets.on("connection", function(socket) {
   // ログイン名を送ってきた時は新規ログインの処理
   socket.on("name", function(text) {
     console.log("name: " + text);
+    // 名前が重複していないかチェックする
+    for (var i in player_list) {
+      var c = player_list[i];
+      if (c.login_name === text) {
+        socket.emit("retry_login");
+        return;
+      }
+    }
+
+    // ログインを許可して初期情報を送ってもらう
+    socket.emit("logined");
+
     player.login_name = text;
     socket.broadcast.emit("name", player.login_name);
     // それまでにログインしてるプレイヤー情報を送る

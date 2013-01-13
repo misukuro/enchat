@@ -1,10 +1,44 @@
-name = prompt("Input name:");
+
+/*
+ * This script is written client side game logic.
+ *
+ * TODO:
+ * enchant.jsのバージョンアップ
+ * 他のプレイヤーやラベルが消えるバグの対処
+ * あとから来たプレイヤーへの、今の状況の再現
+ * XSS対策
+ * 名前と吹き出しの表示リファクタリング
+ * 　Charaクラスに機能追加　Chara.prototype = new Sprite();
+ * ログイン時に名前だけじゃなく場所と吹き出しも送る
+ * 　deffered使う？
+ * ゲーム化(ゾンビ感染ゲーム、雪合戦、NPCを捕まえる)
+ * 
+ * DONE:
+ * 名前の重複チェック
+ *
+ *
+ */
+
+name = prompt("名前を入力してください：");
 
 var port = 20105;
 var socket = io.connect("/", { port: port });
 
+// WebSocket接続の確立時
+// 名前を送って、重複していないかチェックする
 socket.on("connect", function() {
   socket.emit("name", name);
+});
+
+// 名前が重複している場合は、再度入力してもらう
+socket.on("retry_login", function() {
+  name = prompt("別の名前を入力してください：");
+  socket.emit("name", name);
+});
+
+// 入力された名前が重複していない場合は、
+// 初期の位置を決めてログインを完了する
+socket.on("logined", function() {
   socket.emit("position", (6 * 16 - 8) + "," + (10 * 16) + "," + 0); // 初期位置
   socket.emit("message", "…"); // 初期メッセージ
 });
