@@ -43,8 +43,12 @@ io.sockets.on("connection", function(socket) {
     socket.emit("logined");
 
     player.login_name = text;
+
+    // 既に参加中のユーザに新規ユーザを知らせる
     socket.broadcast.emit("name", player.login_name);
-    // それまでにログインしてるプレイヤー情報を送る
+
+
+    // 新規ユーザにそれまでにログインしてるプレイヤー情報を送る
     for (var i in player_list) {
       var c = player_list[i]; // ログイン中プレイヤーリストからプレイヤー情報取得
       socket.emit("name", c.login_name);

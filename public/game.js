@@ -3,9 +3,8 @@
  * This script is written client side game logic.
  *
  * TODO:
- * enchant.jsのバージョンアップ
- * 他のプレイヤーやラベルが消えるバグの対処
  * あとから来たプレイヤーへの、今の状況の再現
+ * 他のプレイヤーやラベルが消えるバグの対処
  * XSS対策
  * 名前と吹き出しの表示リファクタリング
  * 　Charaクラスに機能追加　Chara.prototype = new Sprite();
@@ -15,6 +14,7 @@
  * 
  * DONE:
  * 名前の重複チェック
+ * enchant.jsのバージョンアップ
  *
  *
  */
@@ -199,16 +199,16 @@ window.onload = function() {
 
         // 名前の表示
         player.login_name = new Label( name );
-        player.login_name._element.setAttribute( 'class', 'login_name' );
+        player.login_name.textAlign = "center";
         player.login_name.width = 100;
         player.login_name.color = 'black';
-        // player.login_name.backgroundColor = 'white';
         player.login_name.x = player.x - 35;
         player.login_name.y = player.y + 32;
 
         // チャット内容の表示
         player.message = new Label( "…" );
-        player.message._element.setAttribute( 'class', 'message' );
+        player.message.opacity = 0.75;
+        player.message.textAlign = "center";
         player.message.width = 100;
         player.message.color = 'black';
         player.message.backgroundColor = 'white';
@@ -266,7 +266,15 @@ window.onload = function() {
 
         // メッセージの入力とフキダシ内容変更
         player.message.addEventListener('touchend',function(e) {
-            var message = prompt( 'input message:', 'hi!' );
+            var message = prompt( 'メッセージを入力してください:', 'hi!' );
+            if ( message != '' ) {
+                player.message.text = message;
+                socket.emit("message", message);
+            }
+        });
+
+        player.addEventListener('touchstart', function(e) {
+            var message = prompt( 'メッセージを入力してください:', 'hi!' );
             if ( message != '' ) {
                 player.message.text = message;
                 socket.emit("message", message);
@@ -274,6 +282,7 @@ window.onload = function() {
         });
 
         // 他のユーザのログイン
+        // 自分がログインした時の、既存ユーザの登録
         socket.on("name", function(text) {
             var login_name = text;
 
@@ -286,16 +295,16 @@ window.onload = function() {
 
             // 名前の表示
             other_player.login_name = new Label( login_name );
-            other_player.login_name._element.setAttribute( 'class', 'login_name' );
+            other_player.login_name.textAlign = "center";
             other_player.login_name.width = 100;
             other_player.login_name.color = 'blue';
-            // other_player.login_name.backgroundColor = 'white';
             other_player.login_name.x = other_player.x - 35;
             other_player.login_name.y = other_player.y + 32;
     
             // チャット内容の表示
             other_player.message = new Label( "こんにちは" );
-            other_player.message._element.setAttribute( 'class', 'message' );
+            other_player.message.textAlign = "center";
+            other_player.message.opacity = 0.75;
             other_player.message.width = 100;
             other_player.message.color = 'blue';
             other_player.message.backgroundColor = 'white';
@@ -332,6 +341,7 @@ window.onload = function() {
                 message_group.removeChild(other_player.message);
                 delete other_player;
             });
+          
         });
 
         var stage = new Group();
