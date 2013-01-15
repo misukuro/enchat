@@ -3,9 +3,6 @@
  * This script is written client side game logic.
  *
  * TODO:
- * あとから来たプレイヤーへの、今の状況の再現
- *   ログイン時に名前だけじゃなく場所と吹き出しも送る
- * 　deffered使う？
  * 名前と吹き出しの表示リファクタリング
  * 　Charaクラスに機能追加　Chara.prototype = new Sprite();
  * 
@@ -14,6 +11,9 @@
  * 名前の重複チェック
  * 他のプレイヤーやラベルが消えるバグの対処
  * enchant.jsのバージョンアップ
+ * あとから来たプレイヤーへの、今の状況の再現
+ *   ログイン時に名前だけじゃなく場所と吹き出しも送る
+ * 　deffered使う？
  *
  *
  */
@@ -38,8 +38,12 @@ socket.on("retry_login", function() {
 // 入力された名前が重複していない場合は、
 // 初期の位置を決めてログインを完了する
 socket.on("logined", function() {
-  socket.emit("position", (6 * 16 - 8) + "," + (10 * 16) + "," + 0); // 初期位置
-  socket.emit("message", "…"); // 初期メッセージ
+  var x = 6 * 16 - 8;
+  var y = 10 * 16;
+  // 初期位置
+  socket.emit("position", { x : x, y : y , direction: 0});
+  // 初期メッセージ
+  socket.emit("message", "…");
 });
 
 enchant();
@@ -206,7 +210,6 @@ window.onload = function() {
 
         // チャット内容の表示
         player.message = new Label( "…" );
-        console.log(player.message);
         player.message.textAlign = "center";
         player.message.width = 100;
         player.message.color = 'black';

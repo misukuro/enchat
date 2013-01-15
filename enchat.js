@@ -53,7 +53,7 @@ io.sockets.on("connection", function(socket) {
       var c = player_list[i]; // ログイン中プレイヤーリストからプレイヤー情報取得
       socket.emit("name", c.login_name);
       socket.emit("position:" + c.login_name,
-                  c.x + "," + c.y + "," + c.direction);
+                  { x : c.x, y : c.y , direction: c.direction});
       socket.emit("message:" + c.login_name, c.message);
     }
     // ログイン中プレイヤーリストへの登録
