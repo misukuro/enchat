@@ -3,20 +3,21 @@
  * This script is written client side game logic.
  *
  * TODO:
- * 名前と吹き出しの表示リファクタリング
- * 　Charaクラスに機能追加　Chara.prototype = new Sprite();
  * 
  * DONE:
- * XSS対策
  * 名前の重複チェック
  * 他のプレイヤーやラベルが消えるバグの対処
  * enchant.jsのバージョンアップ
  * あとから来たプレイヤーへの、今の状況の再現
  *   ログイン時に名前だけじゃなく場所と吹き出しも送る
  * 　deffered使う？
+ * 名前と吹き出しの表示リファクタリング
+ * 　Charaクラスに機能追加　Chara.prototype = new Sprite();
  *
  *
  */
+
+var game;
 
 name = prompt("名前を入力してください：");
 
@@ -48,8 +49,44 @@ socket.on("logined", function() {
 
 enchant();
 
+var Chara = enchant.Class.create(enchant.Sprite, {
+  initialize: function(name, x, y, color, isSelf) {
+      enchant.Sprite.call(this, 32, 32);
+      this.image = new Surface(96, 128);
+      if (isSelf) {
+        this.image.draw(game.assets['images/chara0.gif'], 0, 0, 96, 128, 0, 0, 96, 128);
+      } else {
+        this.image.draw(game.assets['images/chara0.gif'], 100, 0, 96, 128, 0, 0, 96, 128);
+      }
+
+      this.x = x;
+      this.y = y;
+      this.isMoving = false;
+      this.direction = 0;
+      this.walk = 1;
+
+      // 名前の表示
+      this.login_name = new Label(name);
+      this.login_name.textAlign = "center";
+      this.login_name.width = 100;
+      this.login_name.color = color;
+      this.login_name.x = this.x - 35;
+      this.login_name.y = this.y + 32;
+
+      // チャット内容の表示
+      this.message = new Label( "…" );
+      this.message.textAlign = "center";
+      this.message.width = 100;
+      this.message.color = color;
+      this.message.backgroundColor = 'white';
+      this.message.x = this.x - 30;
+      this.message.y = this.y - 16;
+
+  }
+});
+
 window.onload = function() {
-    var game = new Game(320, 320);
+    game = new Game(320, 320);
     game.fps = 15;
     game.preload('images/map1.gif', 'images/chara0.gif');
     game.onload = function() {
@@ -189,33 +226,9 @@ window.onload = function() {
         var chara_group = new Group();
         var message_group = new Group();
 
-        var player = new Sprite(32, 32);
-        player.x = 6 * 16 - 8;
-        player.y = 10 * 16;
-        var image = new Surface(96, 128);
-        image.draw(game.assets['images/chara0.gif'], 0, 0, 96, 128, 0, 0, 96, 128);
-        player.image = image;
-
-        player.isMoving = false;
-        player.direction = 0;
-        player.walk = 1;
-
-        // 名前の表示
-        player.login_name = new Label( name );
-        player.login_name.textAlign = "center";
-        player.login_name.width = 100;
-        player.login_name.color = 'black';
-        player.login_name.x = player.x - 35;
-        player.login_name.y = player.y + 32;
-
-        // チャット内容の表示
-        player.message = new Label( "…" );
-        player.message.textAlign = "center";
-        player.message.width = 100;
-        player.message.color = 'black';
-        player.message.backgroundColor = 'white';
-        player.message.x = player.x - 30;
-        player.message.y = player.y - 16;
+        var x = 6 * 16 - 8;
+        var y = 10 * 16;
+        var player = new Chara(name, x, y, "black", true);
 
         // キャラクタ表示レイヤーとメッセージ表示レイヤーに追加
         chara_group.addChild(player);
@@ -288,29 +301,9 @@ window.onload = function() {
         socket.on("name", function(text) {
             var login_name = text;
 
-            var other_player = new Sprite(32, 32);
-            other_player.x = 7 * 16 - 8;
-            other_player.y = 11 * 16;
-            var image2 = new Surface(96, 128);
-            image2.draw(game.assets['images/chara0.gif'], 100, 0, 96, 128, 0, 0, 96, 128);
-            other_player.image = image2;
-
-            // 名前の表示
-            other_player.login_name = new Label( login_name );
-            other_player.login_name.textAlign = "center";
-            other_player.login_name.width = 100;
-            other_player.login_name.color = 'blue';
-            other_player.login_name.x = other_player.x - 35;
-            other_player.login_name.y = other_player.y + 32;
-    
-            // チャット内容の表示
-            other_player.message = new Label( "こんにちは" );
-            other_player.message.textAlign = "center";
-            other_player.message.width = 100;
-            other_player.message.color = 'blue';
-            other_player.message.backgroundColor = 'white';
-            other_player.message.x = other_player.x - 30;
-            other_player.message.y = other_player.y - 16;
+            var x = 7 * 16 - 8;
+            var y = 11 * 16;
+            var other_player = new Chara(login_name, x, y, "blue", false);
 
             // キャラクタ表示レイヤーとメッセージ表示レイヤーに追加
             chara_group.addChild(other_player);
