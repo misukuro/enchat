@@ -4,16 +4,15 @@
  *
  * TODO:
  * あとから来たプレイヤーへの、今の状況の再現
- * 他のプレイヤーやラベルが消えるバグの対処
- * XSS対策
+ *   ログイン時に名前だけじゃなく場所と吹き出しも送る
+ * 　deffered使う？
  * 名前と吹き出しの表示リファクタリング
  * 　Charaクラスに機能追加　Chara.prototype = new Sprite();
- * ログイン時に名前だけじゃなく場所と吹き出しも送る
- * 　deffered使う？
- * ゲーム化(ゾンビ感染ゲーム、雪合戦、NPCを捕まえる)
  * 
  * DONE:
+ * XSS対策
  * 名前の重複チェック
+ * 他のプレイヤーやラベルが消えるバグの対処
  * enchant.jsのバージョンアップ
  *
  *
@@ -207,7 +206,7 @@ window.onload = function() {
 
         // チャット内容の表示
         player.message = new Label( "…" );
-        player.message.opacity = 0.75;
+        console.log(player.message);
         player.message.textAlign = "center";
         player.message.width = 100;
         player.message.color = 'black';
@@ -273,7 +272,7 @@ window.onload = function() {
             }
         });
 
-        player.addEventListener('touchstart', function(e) {
+        player.addEventListener('touchend', function(e) {
             var message = prompt( 'メッセージを入力してください:', 'hi!' );
             if ( message != '' ) {
                 player.message.text = message;
@@ -304,7 +303,6 @@ window.onload = function() {
             // チャット内容の表示
             other_player.message = new Label( "こんにちは" );
             other_player.message.textAlign = "center";
-            other_player.message.opacity = 0.75;
             other_player.message.width = 100;
             other_player.message.color = 'blue';
             other_player.message.backgroundColor = 'white';
